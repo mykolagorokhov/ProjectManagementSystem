@@ -1,8 +1,10 @@
 package dao;
 
-import entity.*;
+
+import entity.ForeignKey;
 
 import java.sql.*;
+
 
 /**
  * Created by MYKOLA.GOROKHOV on 03.06.2017.
@@ -10,7 +12,7 @@ import java.sql.*;
 public class ForeignKeyDAO implements DAO<ForeignKey> {
     // JDBC driver name and database URL
     static final String JDBC_DRIVER = "com.mysql.jdbc.Driver";
-    static final String DB_URL = "jdbc:mysql://127.0.0.1:3306/home_work_1?useSSL=false";
+    static final String DB_URL = "jdbc:mysql://127.0.0.1:3306/home_work_1?useSSL=false&useJDBCCompliantTimezoneShift=true&useLegacyDatetimeCode=false&serverTimezone=UTC";
 
     //  Database credentials
     static final String USER = "root";
@@ -20,9 +22,19 @@ public class ForeignKeyDAO implements DAO<ForeignKey> {
         this.tableName = tableName;
     }
 
+    public String getTableName() {
+        return tableName;
+    }
+
     private String tableName;
 
     private Connection getConnection() throws SQLException {
+
+//        MysqlDataSource mysqlDS = new MysqlDataSource();
+//        mysqlDS.setURL(DB_URL);
+//        mysqlDS.setUser(USER);
+//        mysqlDS.setPassword(PASS);
+//        return mysqlDS.getConnection();
         return DriverManager.getConnection(DB_URL, USER, PASS);
     }
 
@@ -45,22 +57,31 @@ public class ForeignKeyDAO implements DAO<ForeignKey> {
             // PreparedStatement почему-то ставит неправельные кавычки ????
 //            PreparedStatement ps = c.prepareStatement("INSERT INTO ? (?,?) VALUES (?, ?);");
 //
-//            ps.setString(1, tableName);
-//            ps.setString(2, getTableColumName(1));
-//            ps.setString(3, getTableColumName(2));
+//                        ps.setString(1, this.getTableName());
+//            ps.setString(2, this.getTableColumName(1));
+//            ps.setString(3, this.getTableColumName(2));
 //            ps.setInt(4, foreignKey.getFirstColum());
 //            ps.setInt(5, foreignKey.getSecondColum());
+//
+//            System.out.println(this.getTableName());
+//            System.out.println(this.getTableColumName(1));
+//            System.out.println(this.getTableColumName(2));
+//=====================================================================================
+            String str = String.format("INSERT INTO %s (%s,%s) VALUES (%d, %d);",
+                    this.getTableName(), this.getTableColumName(1), this.getTableColumName(2),
+                    foreignKey.getFirstColum(), foreignKey.getSecondColum());
+            PreparedStatement ps = c.prepareStatement(str);
 
-
-
-            PreparedStatement ps = c.prepareStatement("INSERT INTO `" +
-                    tableName +
-                    "` (`" + getTableColumName(1) +
-                    "`, `" + getTableColumName(2) +
-                    "`) VALUES (?, ?);");
-
-            ps.setInt(1, foreignKey.getFirstColum());
-            ps.setInt(2, foreignKey.getSecondColum());
+//=====================================================================================
+//            PreparedStatement ps = c.prepareStatement("INSERT INTO `" +
+//                    tableName +
+//                    "` (`" + getTableColumName(1) +
+//                    "`, `" + getTableColumName(2) +
+//                    "`) VALUES (?, ?);");
+// ' `
+//            ps.setInt(1, foreignKey.getFirstColum());
+//            ps.setInt(2, foreignKey.getSecondColum());
+//
 //            System.out.println(ps.toString());
 //            System.out.println(tableName);
 //            System.out.println(getTableColumName(1));
